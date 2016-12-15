@@ -1,10 +1,15 @@
 unit Unit1;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, shellapi, ExtCtrls;
+  Windows, LCLIntf, LCLType,
+  SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ExtCtrls;
 
 type
   TForm1 = class(TForm)
@@ -24,28 +29,28 @@ type
 
 var
   Form1: TForm1;
-  SelectedRule:String;
+  SelectedRule: string;
 
 implementation
 
-{$R *.dfm}
+{$R Unit1.dfm}
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-    SelectedRule:= ComboBox1.Text;
-    Form1.Close;
+  SelectedRule := ComboBox1.Text;
+  Form1.Close;
 end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 begin
-    SelectedRule:= '';
-    Form1.Close;
+  SelectedRule := '';
+  Form1.Close;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  SelectedRule:= '';
-  Form1.Icon.Handle :=  extracticon(hinstance,'1cv7s.exe',0);
+  SelectedRule := '';
+  Form1.Icon.Handle := extracticon(hinstance, '1cv7s.exe', 0);
 end;
 
 end.

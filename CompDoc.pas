@@ -104,7 +104,6 @@
 unit CompDoc;
 
 interface
-
 uses
   Windows, ActiveX, SysUtils, Classes;
 
@@ -411,13 +410,15 @@ begin
   until (hr <> S_OK);
 end;
 
-function GetMode(Accessmode : TAccessMode; ShareMode : TShareMode;
-  TransactMode : TTransactMode; CreateNew : boolean) : longint;
+function GetMode(Accessmode : TAccessMode; ShareMode : TShareMode;  TransactMode : TTransactMode; CreateNew : boolean) : longint;
 begin
+  {$R-}
   Result := ord(AccessMode) or (Ord(Succ(ShareMode)) shl 4) or (Ord(TransactMode) shl 16);
   if CreateNew then
     Result := Result or STGM_CREATE;
+  {$R+}
 end;
+
 
 constructor TStorage.Create(Name : string; ParentStorage : TStorage; AccessMode : TAccessMode;
   TransactMode : TTransactMode; CreateNew : boolean);
@@ -931,7 +932,7 @@ var
 begin
   PName := StringToPWideChar(FileName);
   try
-    hr := StgSetTimes(PName, Times.Creation, Times.LastAccess, Times.LastModify);
+    hr := StgSetTimes(PName, @Times.Creation, @Times.LastAccess, @Times.LastModify);
     if hr <> S_OK then
       raise ECompDocError.Create('set times failed');
   finally

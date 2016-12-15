@@ -1,0 +1,21 @@
+Hint: * Преобразование файла L:\Projects\1C Domain Authority\DomainLogonTo1C.dpr *
+Hint: Кодировка изменена с cp1251 на UTF-8
+Hint: К параметрам пользователя добавлены определения -dBorland -dVer150 -dDelphi7 -dCompiler6_Up -dPUREPASCAL
+Hint: Найдены все файлы модулей
+Hint: Модуль "Windows" в выражении Uses заменён на "LCLIntf, LCLType, LMessages".
+Hint: Вызов CloseHandle(PI.hThread); заменён на FileClose(PI.hThread); { *Преобразовано из CloseHandle* }
+Hint: Вызов CloseHandle(PI.hProcess); заменён на FileClose(PI.hProcess); { *Преобразовано из CloseHandle* }
+Hint: Вызов Ptr($26029691) заменён на Pointer($26029691) { *Преобразовано из Ptr* }
+Hint: Вызов CloseHandle(PI.hThread); заменён на FileClose(PI.hThread); { *Преобразовано из CloseHandle* }
+Hint: Вызов CloseHandle(PI.hProcess); заменён на FileClose(PI.hProcess); { *Преобразовано из CloseHandle* }
+Hint: * Исправление списка используемых модулей в файле L:\Projects\1C Domain Authority\DomainLogonTo1C.dpr *
+Hint: 
+Hint: *** Преобразование файлов модулей, принадлежащих проекту/пакету ***
+Hint: * Преобразование файла L:\Projects\1C Domain Authority\Unit1.pas *
+Hint: Модуль "shellapi" удалён из выражения Uses.
+Hint: Модуль "Windows" в выражении Uses заменён на "LCLIntf, LCLType, LMessages".
+Hint: * Преобразование файла L:\Projects\1C Domain Authority\CompDoc.pas *
+Hint: Модуль "Windows" в выражении Uses заменён на "LCLIntf, LCLType, LMessages".
+Hint: * Исправление списка используемых модулей в файле L:\Projects\1C Domain Authority\Unit1.pas *
+Hint: * Исправление списка используемых модулей в файле L:\Projects\1C Domain Authority\CompDoc.pas *
+Hint: Преобразование завершено.

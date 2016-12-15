@@ -1,19 +1,19 @@
-program DomainLogonTo1C;
+п»їprogram DomainLogonTo1C;
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
 
 uses
+  Windows,
   SysUtils,
-  StrUtils,
   CompDoc,
   Classes,
-  Windows,Forms, Messages,
-  Unit1 in 'Unit1.pas' {Form1},
-  ActiveX,
-  ComObj,
-  Variants
-  //,
-  //WbemScripting_TLB
-  ;
-{$R *.res}
+  LCLIntf, LCLType,Forms, Interfaces, Messages,
+  Unit1 in 'Unit1.pas',
+  jwawinuser;
+
+//{$R *.res}
 
 Function GetUserFromWindows: string;
 Var
@@ -58,7 +58,7 @@ begin
     if streams.Count > 0 then
         begin
           storagestream := TStorageStream.Create('Container.Contents',RootStorage, amRead, false);
-          //MessageBox(0,PChar(IntToStr(storagestream.Size)),'Ошибка',0);
+          //MessageBox(0,PChar(IntToStr(storagestream.Size)),'РћС€РёР±РєР°',0);
           //SetLength(buffer, storagestream.Size);
           storagestream.Read(buffer,storagestream.Size);
           PageProperty:=0;
@@ -91,7 +91,7 @@ begin
                       '"': begin end;
                     End;
              0: BEgin
-                //MessageBox(0,PChar(UserName),'Ошибка',0);
+                //MessageBox(0,PChar(UserName),'РћС€РёР±РєР°',0);
                 If (pos(dUserName,UserName) <> 0) OR (pos(FullUserName,UserName) <> 0) then //
                 begin
                    UserNames.Add(UserName);
@@ -112,7 +112,7 @@ begin
                    k := 8;
 
 //                   For n:=0 to pageBuffer[0] do UserHash:=UserHash + Chr(pageBuffer[n]);
-//                   MessageBox(0,PChar('Хэш ' + UserHash),'Ошибка',0);
+//                   MessageBox(0,PChar('РҐСЌС€ ' + UserHash),'РћС€РёР±РєР°',0);
 
                    for n:=1 to 8 do
                     begin
@@ -125,7 +125,7 @@ begin
                     end;
                     UserRules.Add(UserRule);
                     HashList.Add(UserHash);
-                    Form1.ComboBox1.Items.Add(UserRule);
+                     Form1.ComboBox1.Items.Add(UserRule);
                     pagestream.Destroy;
             end;
     end;
@@ -148,7 +148,7 @@ begin
            End
            Else If UserRules.Count = 0 Then Begin
                   //GetUsersList:='';
-                  MessageBox(0,PChar('Пользователя с именем ' + DUserName + ' нет в списке пользователей.'),'Ошибка',0);
+                  MessageBoxW(0,PWChar('РџРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ РёРјРµРЅРµРј ' + DUserName + ' РЅРµС‚ РІ СЃРїРёСЃРєРµ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№.'),'РћС€РёР±РєР°',0);
            End
            Else IF UserRules.Count = 1 then begin
                   GetUsersList.Add(UserNames[0]);
@@ -159,56 +159,60 @@ end;
 
 Var
   hProc, PID, numberRead : DWORD;
-  hWnd,hWndChild  : THandle; // Хэндл окна
+  hWnd,hWndChild  : THandle; // РҐСЌРЅРґР» РѕРєРЅР°
   DUserName, UserName: String;
   FullUserName:String;
   iPBuf: DWORD;
-  SI: STARTUPINFO;
+  SI: STARTUPINFOA;
   PI: PROCESS_INFORMATION;
   UserHash:AnsiString;
-  DbPath, bUserHash:array [0..255] of Char;
+  DbPath :array [0..255] of Char;
   Buf: byte;
   ExePath:String;
   UserParamList:TStringList;
-  i:integer;
+  //i:integer;
+
+{$R *.res}
+
 
 begin
-    DUserName := GetUserFromWindows(); // Взяли доменное имя пользователя
+  Application.Initialize;
+    DUserName := GetUserFromWindows(); // Р’Р·СЏР»Рё РґРѕРјРµРЅРЅРѕРµ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
   If ParamCount > 0 Then ExePath:=ParamStr(1)
   Else ExePath:= '1cv7s.exe';
 
 
   IF NOT CreateProcess(nil,PChar(ExePath),nil,nil,False,0,nil,nil,SI,PI) Then begin
-       MessageBox(0,PChar('Не найден исполняемый файл 1С. ' + ExePath),'Ошибка',0);
+       MessageBoxW(0,PWChar('РќРµ РЅР°Р№РґРµРЅ РёСЃРїРѕР»РЅСЏРµРјС‹Р№ С„Р°Р№Р» 1РЎ. ' + ExePath),'РћС€РёР±РєР°',0);
        Exit;
      end;
   hProc:= PI.hProcess;
-  While GetGuiResources(hProc,GR_USEROBJECTS) = 0 do begin //Цикл ожидания зарузки процесса 1С
-    Sleep(20); //Если не добавить Sleep будет загрузка процессора под 80%
+  While GetGuiResources(hProc,GR_USEROBJECTS) = 0 do begin //Р¦РёРєР» РѕР¶РёРґР°РЅРёСЏ Р·Р°СЂСѓР·РєРё РїСЂРѕС†РµСЃСЃР° 1РЎ
+    Sleep(20); //Р•СЃР»Рё РЅРµ РґРѕР±Р°РІРёС‚СЊ Sleep Р±СѓРґРµС‚ Р·Р°РіСЂСѓР·РєР° РїСЂРѕС†РµСЃСЃРѕСЂР° РїРѕРґ 80%
   end;
   PID := 0;
   hWND:= 0;
-  if hProc <> 0 then // условие проверки подключения к процессу
+  if hProc <> 0 then // СѓСЃР»РѕРІРёРµ РїСЂРѕРІРµСЂРєРё РїРѕРґРєР»СЋС‡РµРЅРёСЏ Рє РїСЂРѕС†РµСЃСЃСѓ
   try
-    While PID <> PI.dwProcessId do Begin //Цмкл ожидания окна авторизации
-      hWnd:=findwindow('#32770','Авторизация  доступа'); //Находим окно с нужным заголовком
-      IF hWND <> 0 Then GetWindowThreadProcessId(hWnd, @Pid);  //Берем PID процесса окна
-      If GetGuiResources(hProc,GR_USEROBJECTS) = 0 Then Exit;  //Окно выбора баз закрыли
-      Sleep(5); //Если не добавить Sleep будет загрузка процессора под 80%
+    While PID <> PI.dwProcessId do Begin //Р¦РјРєР» РѕР¶РёРґР°РЅРёСЏ РѕРєРЅР° Р°РІС‚РѕСЂРёР·Р°С†РёРё
+      hWnd:=findwindowW('#32770',PWCHAR('РђРІС‚РѕСЂРёР·Р°С†РёСЏ  РґРѕСЃС‚СѓРїР°')); //РќР°С…РѕРґРёРј РѕРєРЅРѕ СЃ РЅСѓР¶РЅС‹Рј Р·Р°РіРѕР»РѕРІРєРѕРј
+      IF hWND <> 0 Then GetWindowThreadProcessId(hWnd, @Pid);  //Р‘РµСЂРµРј PID РїСЂРѕС†РµСЃСЃР° РѕРєРЅР°
+      If GetGuiResources(hProc,GR_USEROBJECTS) = 0 Then Exit;  //РћРєРЅРѕ РІС‹Р±РѕСЂР° Р±Р°Р· Р·Р°РєСЂС‹Р»Рё
+      Sleep(5); //Р•СЃР»Рё РЅРµ РґРѕР±Р°РІРёС‚СЊ Sleep Р±СѓРґРµС‚ Р·Р°РіСЂСѓР·РєР° РїСЂРѕС†РµСЃСЃРѕСЂР° РїРѕРґ 80%
     End;
     //Exit;
 
-    showwindow(hWND,sw_hide);   //скрыли окно авторизации
-    SuspendThread(PI.hThread); // Заморозили поток чтобы пользователь не авторизовался пока мы собриаем список пользователей
-//    Для того, чтобы получить путь к выбранной базе нужно внутри процесса 1С пройти по двум ссылкам.
-//    Модуль 1Cv7s.exe загружается по адресу 400000h. Ссылки на переменную искал при помощи CheatEngine
+    showwindow(hWND,sw_hide);   //СЃРєСЂС‹Р»Рё РѕРєРЅРѕ Р°РІС‚РѕСЂРёР·Р°С†РёРё
+    SuspendThread(PI.hThread); // Р—Р°РјРѕСЂРѕР·РёР»Рё РїРѕС‚РѕРє С‡С‚РѕР±С‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ Р°РІС‚РѕСЂРёР·РѕРІР°Р»СЃСЏ РїРѕРєР° РјС‹ СЃРѕР±СЂРёР°РµРј СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+//    Р”Р»СЏ С‚РѕРіРѕ, С‡С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ РїСѓС‚СЊ Рє РІС‹Р±СЂР°РЅРЅРѕР№ Р±Р°Р·Рµ РЅСѓР¶РЅРѕ РІРЅСѓС‚СЂРё РїСЂРѕС†РµСЃСЃР° 1РЎ РїСЂРѕР№С‚Рё РїРѕ РґРІСѓРј СЃСЃС‹Р»РєР°Рј.
+//    РњРѕРґСѓР»СЊ 1Cv7s.exe Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ РїРѕ Р°РґСЂРµСЃСѓ 400000h. РЎСЃС‹Р»РєРё РЅР° РїРµСЂРµРјРµРЅРЅСѓСЋ РёСЃРєР°Р» РїСЂРё РїРѕРјРѕС‰Рё CheatEngine
 //    362CC -> +$4 ->
-//    Т.е. сначало нужно прочитать значение по адресу 4362СС. К этому значени добавить 4.
-//    Взять его как следующий адрес и прочитать еще одно значение.
-//    Взять его как следующий адрес и прочить по этому адресу строку длиной 255 байт
-    ReadProcessMemory(hProc, ptr($004362CC), @iPBuf, SizeOf(iPBuf), numberRead); // чтение из памяти адреса
-    ReadProcessMemory(hProc, ptr(iPBuf + 4), @iPBuf, SizeOf(iPBuf), numberRead); // чтение из памяти следующего адреса
-    ReadProcessMemory(hProc, ptr(iPBuf), @DbPath, SizeOf(DbPath), numberRead);   // чтение из памяти строки пути к базе
+//    Рў.Рµ. СЃРЅР°С‡Р°Р»Рѕ РЅСѓР¶РЅРѕ РїСЂРѕС‡РёС‚Р°С‚СЊ Р·РЅР°С‡РµРЅРёРµ РїРѕ Р°РґСЂРµСЃСѓ 4362РЎРЎ. Рљ СЌС‚РѕРјСѓ Р·РЅР°С‡РµРЅРё РґРѕР±Р°РІРёС‚СЊ 4.
+//    Р’Р·СЏС‚СЊ РµРіРѕ РєР°Рє СЃР»РµРґСѓСЋС‰РёР№ Р°РґСЂРµСЃ Рё РїСЂРѕС‡РёС‚Р°С‚СЊ РµС‰Рµ РѕРґРЅРѕ Р·РЅР°С‡РµРЅРёРµ.
+//    Р’Р·СЏС‚СЊ РµРіРѕ РєР°Рє СЃР»РµРґСѓСЋС‰РёР№ Р°РґСЂРµСЃ Рё РїСЂРѕС‡РёС‚СЊ РїРѕ СЌС‚РѕРјСѓ Р°РґСЂРµСЃСѓ СЃС‚СЂРѕРєСѓ РґР»РёРЅРѕР№ 255 Р±Р°Р№С‚
+    ReadProcessMemory(hProc, Pointer($004362CC), @iPBuf, SizeOf(iPBuf), numberRead); // С‡С‚РµРЅРёРµ РёР· РїР°РјСЏС‚Рё Р°РґСЂРµСЃР°
+    ReadProcessMemory(hProc, Pointer(iPBuf + 4), @iPBuf, SizeOf(iPBuf), numberRead); // С‡С‚РµРЅРёРµ РёР· РїР°РјСЏС‚Рё СЃР»РµРґСѓСЋС‰РµРіРѕ Р°РґСЂРµСЃР°
+    ReadProcessMemory(hProc, Pointer(iPBuf), @DbPath, SizeOf(DbPath), numberRead);   // С‡С‚РµРЅРёРµ РёР· РїР°РјСЏС‚Рё СЃС‚СЂРѕРєРё РїСѓС‚Рё Рє Р±Р°Р·Рµ
     Application.CreateForm(TForm1, Form1);
     UserName :='';
     FullUserName:=StringReplace(FullUserName,' ','',[rfReplaceAll]);
@@ -217,45 +221,53 @@ begin
     UserHash:=UserParamList[1];
     iF UserParamList.Count = 0 Then Begin
       TerminateProcess(hProc,1);
-      CloseHandle(PI.hProcess);
-      CloseHandle(PI.hThread);
+      CloseHandle(PI.hProcess); { *РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРѕ РёР· CloseHandle* }
+      CloseHandle(PI.hThread); { *РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРѕ РёР· CloseHandle* }
       exit;
     End;
     //26029691  50  Push EAX           2602969C
     //26029692  51  Push ECX
     //26029693  FF15 24B90326  CALL DWORD PTR DS:[<&MSVCRT._mbscmp>]    ; \_mbscmp
-    //Патчим код библиотеки UserDef.dll, для того чтобы пароль сравнивался сам с собой, т.к. пароль вводить не будем.
-    //Тонкое место т.к. userdef.dll может оказаться загруженной по другому адресу.
+
+    //РџР°С‚С‡РёРј РєРѕРґ Р±РёР±Р»РёРѕС‚РµРєРё UserDef.dll, РґР»СЏ С‚РѕРіРѕ С‡С‚РѕР±С‹ РїР°СЂРѕР»СЊ СЃСЂР°РІРЅРёРІР°Р»СЃСЏ СЃР°Рј СЃ СЃРѕР±РѕР№, С‚.Рє. РїР°СЂРѕР»СЊ РІРІРѕРґРёС‚СЊ РЅРµ Р±СѓРґРµРј.
+    //РўРѕРЅРєРѕРµ РјРµСЃС‚Рѕ С‚.Рє. userdef.dll РјРѕР¶РµС‚ РѕРєР°Р·Р°С‚СЊСЃСЏ Р·Р°РіСЂСѓР¶РµРЅРЅРѕР№ РїРѕ РґСЂСѓРіРѕРјСѓ Р°РґСЂРµСЃСѓ.
     Buf:=$51;
-    WriteProcessMemory(hProc, Ptr($26029691), @Buf,1,numberRead);
-    sleep(20);
+    WriteProcessMemory(hProc, Pointer($26029691) { *РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРѕ РёР· Ptr* }, @Buf,1,numberRead);
+    //Sleep(20);
     //26029691  51  Push ECX
     //26029692  51  Push ECX
     //26029693  FF15 24B90326  CALL DWORD PTR DS:[<&MSVCRT._mbscmp>]    ; \_mbscmp
-    ResumeThread(PI.hThread);  // Разморозили поток
+    ResumeThread(PI.hThread);  // Р Р°Р·РјРѕСЂРѕР·РёР»Рё РїРѕС‚РѕРє
 
     hWndChild := FindWindowEx(HWnd, 0,'ComboBox','');
     SendMessage(hWndChild,CB_SETCURSEL,SendMessage(hWndChild,cb_FindString,-1,Integer(UserName)),0);
     hWndChild := FindWindowEx(HWnd, 0,'Button','OK');
     SendMessage(hWndChild, BM_CLICK,0,0);
-
     Sleep(5000);
-    While PID <> PI.dwProcessId do Begin //Цмкл ожидания окна 1С
-      hWnd:=findwindow('#32770',''); //Находим окно с нужным заголовком
-      IF hWND <> 0 Then GetWindowThreadProcessId(hWnd, @Pid);  //Берем PID процесса окна
-      If GetGuiResources(hProc,GR_USEROBJECTS) = 0 Then Exit;  //Окно выбора баз закрыли
-      Sleep(5); //Если не добавить Sleep будет загрузка процессора под 80%
+
+    //CloseHandle(PI.hProcess); { *РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРѕ РёР· CloseHandle* }
+    //CloseHandle(PI.hThread); { *РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРѕ РёР· CloseHandle* }
+    exit;
+
+    //PID := 0;
+    //
+    //While PID <> PI.dwProcessId do Begin //Р¦РјРєР» РѕР¶РёРґР°РЅРёСЏ РѕРєРЅР° 1РЎ
+    //  hWnd:=findwindow('#32770',''); //РќР°С…РѕРґРёРј РѕРєРЅРѕ СЃ РЅСѓР¶РЅС‹Рј Р·Р°РіРѕР»РѕРІРєРѕРј
+    //  IF hWND <> 0 Then GetWindowThreadProcessId(hWnd, @Pid);  //Р‘РµСЂРµРј PID РїСЂРѕС†РµСЃСЃР° РѕРєРЅР°
+    //  If GetGuiResources(hProc,GR_USEROBJECTS) = 0 Then Exit;  //РћРєРЅРѕ РІС‹Р±РѕСЂР° Р±Р°Р· Р·Р°РєСЂС‹Р»Рё
+    //  Sleep(5); //Р•СЃР»Рё РЅРµ РґРѕР±Р°РІРёС‚СЊ Sleep Р±СѓРґРµС‚ Р·Р°РіСЂСѓР·РєР° РїСЂРѕС†РµСЃСЃРѕСЂР° РїРѕРґ 80%
+    //End;
+    //
+    //MessageBoxW(0,PWChar(String(UserHash)),'РћС€РёР±РєР°',0);
+    //SuspendThread(PI.hThread);
+    //For i:=0 to Length(UserHash) do bUserHash[i]:= UserHash[i];
+    //WriteProcessMemory(hProc, Pointer($05D7E5A8), @bUserHash, SizeOf(UserHash), numberRead);
+    //ResumeThread(PI.hThread);
+  finally
+    Begin
+     CloseHandle(PI.hProcess); { *РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРѕ РёР· CloseHandle* }
+     CloseHandle(PI.hThread); { *РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРѕ РёР· CloseHandle* }
     End;
-
-    MessageBox(0,PChar(String(UserHash)),'Ошибка',0);
-    SuspendThread(PI.hThread);
-    For i:=0 to Length(UserHash) do bUserHash[i]:= UserHash[i];
-    WriteProcessMemory(hProc, ptr($05D7E5A8), @bUserHash, SizeOf(UserHash), numberRead);
-    ResumeThread(PI.hThread);
-  finally Begin
-   CloseHandle(PI.hProcess);
-   CloseHandle(PI.hThread);
   End;
-end;
-
+exit;
 end.
